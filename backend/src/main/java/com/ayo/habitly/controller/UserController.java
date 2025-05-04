@@ -23,5 +23,9 @@ public class UserController {
         userRepository.save(user);
         return ResponseEntity.ok("User registered successfully.");
     }
-}
 
+    @GetMapping
+    public ResponseEntity<?> getAllUsers() {
+        return ResponseEntity.ok(userRepository.findAll());
+    }
+}
