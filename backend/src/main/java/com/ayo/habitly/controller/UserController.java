@@ -1,5 +1,6 @@
 package com.ayo.habitly.controller;
 
+import com.ayo.habitly.dto.UserDTO;
 import com.ayo.habitly.model.User;
 import com.ayo.habitly.repository.UserRepository;
 import com.ayo.habitly.security.JwtUtil;
@@ -8,6 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -55,17 +57,28 @@ public class UserController {
         // ✅ Generate JWT token
         String token = jwtUtil.generateToken(user.getEmail());
 
-        // ✅ Prepare response with token + user details
+        // ✅ Prepare response with token + safe user info
         Map<String, Object> response = new HashMap<>();
         response.put("message", "Login successful.");
         response.put("token", token);
-        response.put("user", user);
+
+        // Map User -> UserDTO (no sensitive data)
+        UserDTO userDTO = new UserDTO(user.getId(), user.getEmail(), user.getName());
+        response.put("user", userDTO);
 
         return ResponseEntity.ok(response);
     }
 
     @GetMapping
     public ResponseEntity<?> getAllUsers() {
-        return ResponseEntity.ok(userRepository.findAll());
+        List<User> users = userRepository.findAll();
+
+        // Map each User to UserDTO
+        List<UserDTO> userDTOs = users.stream()
+                .map(user -> new UserDTO(user.getId(), user.getEmail(), user.getName()))
+                .toList();
+
+        return ResponseEntity.ok(userDTOs);
     }
 }
+ 
