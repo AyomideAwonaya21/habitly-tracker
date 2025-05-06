@@ -42,15 +42,20 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody User loginRequest) {
+        System.out.println("🔑 Login attempt with email: " + loginRequest.getEmail());
+
         Optional<User> optionalUser = userRepository.findByEmail(loginRequest.getEmail());
         if (optionalUser.isEmpty()) {
+            System.out.println("❌ User not found for email: " + loginRequest.getEmail());
             return ResponseEntity.badRequest().body("Invalid email or password.");
         }
 
         User user = optionalUser.get();
         boolean passwordMatches = passwordEncoder.matches(loginRequest.getPassword(), user.getPassword());
+        System.out.println("🔎 Password match result: " + passwordMatches);
 
         if (!passwordMatches) {
+            System.out.println("❌ Password does not match for email: " + loginRequest.getEmail());
             return ResponseEntity.badRequest().body("Invalid email or password.");
         }
 
@@ -66,6 +71,7 @@ public class UserController {
         UserDTO userDTO = new UserDTO(user.getId(), user.getEmail(), user.getName());
         response.put("user", userDTO);
 
+        System.out.println("✅ Login successful for email: " + loginRequest.getEmail());
         return ResponseEntity.ok(response);
     }
 
@@ -81,4 +87,3 @@ public class UserController {
         return ResponseEntity.ok(userDTOs);
     }
 }
- 
